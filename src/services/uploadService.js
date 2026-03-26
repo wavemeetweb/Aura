@@ -6,7 +6,7 @@ export const uploadImage = async (file) => {
   form.append("upload_preset", "YOUR_UNSIGNED_PRESET");
 
   const res = await axios.post(
-    "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload",
+    "https://api.cloudinary.com/v1_1/dx7tyxquo/image/upload",
     form
   );
 
