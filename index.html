@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura | Social Media</title>
+    <title>Aura | Experience Moments</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
     <style>
         :root {
             --bg: #050505;
             --card: #121212;
             --accent: #ffffff;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(255, 255, 255, 0.08);
             --text-muted: #a0a0a0;
+            --error: #ff4b4b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
@@ -25,181 +26,175 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            overflow-x: hidden;
         }
 
-        /* Utils */
+        /* Helpers */
         .hidden { display: none !important; }
-        .glass { background: var(--glass); backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: 16px; }
+        .glass { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); }
 
-        /* Auth UI */
+        /* Auth Screen */
         #auth-container {
             width: 100%;
-            max-width: 400px;
-            margin-top: 100px;
+            max-width: 380px;
+            margin-top: 10vh;
             padding: 40px;
+            border-radius: 28px;
             text-align: center;
-            animation: fadeIn 0.6s ease-out;
+            animation: fadeIn 0.8s ease-out;
         }
 
-        h1.logo { 
-            font-size: 2.5rem; 
+        .logo { 
+            font-size: 3.5rem; 
             font-weight: 600; 
             margin-bottom: 2rem; 
-            letter-spacing: -1px;
-            background: linear-gradient(45deg, #fff, #555);
+            letter-spacing: -3px;
+            background: linear-gradient(180deg, #fff 0%, #444 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         input, textarea {
             width: 100%;
-            padding: 12px 16px;
+            padding: 14px 18px;
             margin-bottom: 12px;
-            background: #1a1a1a;
+            background: rgba(255,255,255,0.03);
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 14px;
             color: white;
             outline: none;
-            transition: border 0.3s;
+            transition: all 0.3s;
         }
 
-        input:focus { border-color: #555; }
+        input:focus { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
 
         button {
             width: 100%;
-            padding: 12px;
-            border-radius: 8px;
+            padding: 14px;
+            border-radius: 14px;
             border: none;
             cursor: pointer;
             font-weight: 600;
-            transition: transform 0.2s, opacity 0.2s;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .btn-primary { background: white; color: black; margin-top: 8px; }
-        .btn-secondary { background: transparent; color: white; border: 1px solid var(--border); margin-top: 8px; }
-        button:active { transform: scale(0.98); }
+        .btn-primary { background: white; color: black; margin-top: 10px; }
+        .btn-primary:hover { transform: scale(1.02); opacity: 0.95; }
+        .btn-secondary { background: transparent; color: white; border: 1px solid var(--border); margin-top: 10px; }
+        .btn-secondary:hover { background: rgba(255,255,255,0.05); }
 
-        /* Main App UI */
+        /* App Layout */
         #app-container {
             width: 100%;
-            max-width: 500px;
+            max-width: 480px;
             padding: 20px;
-            animation: slideUp 0.5s ease-out;
+            animation: slideUp 0.6s ease-out;
         }
 
         nav {
             position: sticky;
             top: 20px;
             z-index: 100;
-            padding: 15px 25px;
+            padding: 14px 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-radius: 20px;
             margin-bottom: 30px;
         }
 
-        /* Upload Modal Style */
-        .upload-section {
-            padding: 20px;
-            margin-bottom: 30px;
+        .upload-card {
+            padding: 24px;
+            border-radius: 24px;
+            margin-bottom: 40px;
         }
 
-        /* Post Card */
-        .post-card {
+        #post-file { border: 1px dashed var(--border); cursor: pointer; }
+
+        /* Feed Cards */
+        .post {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 20px;
-            margin-bottom: 25px;
+            border-radius: 28px;
+            margin-bottom: 30px;
             overflow: hidden;
-            transition: transform 0.3s;
+            animation: postFade 0.5s ease-out;
         }
 
         .post-header {
-            padding: 15px;
+            padding: 16px 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
+            gap: 12px;
         }
 
-        .post-header .avatar {
-            width: 32px;
-            height: 32px;
-            background: #333;
+        .avatar {
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
+            background: linear-gradient(45deg, #1a1a1a, #333);
+            border: 1px solid var(--border);
         }
 
-        .post-img {
+        .username { font-weight: 600; font-size: 0.9rem; letter-spacing: -0.3px; }
+
+        .post-media {
             width: 100%;
-            display: block;
             aspect-ratio: 1/1;
             object-fit: cover;
+            background: #000;
+            display: block;
         }
 
-        .post-content { padding: 15px; }
-        .post-user { font-weight: 600; margin-right: 8px; }
-        .post-caption { font-size: 0.95rem; line-height: 1.4; color: #efefef; }
+        .post-footer { padding: 20px; }
+        .caption { font-size: 0.95rem; line-height: 1.5; color: #efefef; }
+        .caption b { margin-right: 8px; font-weight: 600; }
 
-        /* Animations */
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        #loading-overlay {
-            position: fixed; top:0; left:0; width: 100%; height: 100%;
-            background: var(--bg); display: flex; align-items: center; justify-content: center; z-index: 9999;
+        /* Loading & Animations */
+        #loader {
+            position: fixed; inset: 0; background: var(--bg);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 9999; font-weight: 300; letter-spacing: 8px;
         }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes postFade { from { opacity: 0; scale: 0.95; } to { opacity: 1; scale: 1; } }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">AURA</div>
+    <div id="loader">AURA</div>
 
     <div id="auth-container" class="glass hidden">
         <h1 class="logo">aura</h1>
-        <div id="auth-inputs">
-            <input type="email" id="auth-email" placeholder="Email">
-            <input type="password" id="auth-password" placeholder="Password">
-            <button id="btn-login" class="btn-primary">Sign In</button>
-            <button id="btn-signup" class="btn-secondary">Create Account</button>
-            <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
-            <button id="btn-google" class="btn-secondary">Continue with Google</button>
+        <div id="auth-form">
+            <input type="email" id="email" placeholder="Email address">
+            <input type="password" id="password" placeholder="Password">
+            <button id="do-login" class="btn-primary">Sign In</button>
+            <button id="do-signup" class="btn-secondary">Create Account</button>
+            <div style="margin: 20px 0; color: var(--text-muted); font-size: 0.8rem;">OR</div>
+            <button id="do-google" class="btn-secondary">Continue with Google</button>
         </div>
     </div>
 
     <div id="app-container" class="hidden">
         <nav class="glass">
-            <span style="font-weight: 600; font-size: 1.2rem;">aura</span>
-            <button id="btn-logout" style="width: auto; padding: 5px 15px; font-size: 0.8rem;" class="btn-secondary">Logout</button>
+            <span style="font-weight: 600; font-size: 1.4rem; letter-spacing: -1.5px;">aura</span>
+            <button id="do-logout" style="width: auto; padding: 6px 16px; font-size: 0.75rem;" class="btn-secondary">Logout</button>
         </nav>
 
-        <div class="upload-section glass">
-            <p style="margin-bottom: 15px; font-weight: 600;">Share a moment</p>
-            <input type="file" id="post-file" accept="image/*" style="font-size: 0.8rem;">
+        <div class="upload-card glass">
+            <p style="margin-bottom: 16px; font-weight: 500; font-size: 0.9rem;">Share something...</p>
+            <input type="file" id="post-file" accept="image/*">
             <textarea id="post-caption" placeholder="Write a caption..." rows="2"></textarea>
-            <button id="btn-post" class="btn-primary">Post to Aura</button>
+            <button id="do-post" class="btn-primary">Post</button>
         </div>
 
-        <div id="feed">
-            </div>
+        <div id="feed"></div>
     </div>
 
     <script type="module">
-        // --- FIREBASE CONFIGURATION ---
-        // Replace these with your actual Firebase project config
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT.firebaseapp.com",
-            projectId: "YOUR_PROJECT",
-            storageBucket: "YOUR_PROJECT.appspot.com",
-            messagingSenderId: "YOUR_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        // --- CLOUDINARY CONFIGURATION ---
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload";
-        const CLOUDINARY_PRESET = "YOUR_UNSIGNED_PRESET";
-
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { 
             getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
@@ -210,128 +205,129 @@
             getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp 
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Your Configs
+        const firebaseConfig = {
+            apiKey: "AIzaSyATSioQeAc2A9BoGzv8S8o53f6-iDcWVr4",
+            authDomain: "aurapers0n.firebaseapp.com",
+            projectId: "aurapers0n",
+            storageBucket: "aurapers0n.firebasestorage.app",
+            messagingSenderId: "180300314364",
+            appId: "1:180300314364:web:1cf8bf819d17ac2f324979"
+        };
+
+        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dx7tyxquo/image/upload";
+        const CLOUDINARY_PRESET = "aura_posts";
+
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const googleProvider = new GoogleAuthProvider();
+        const provider = new GoogleAuthProvider();
 
-        // --- DOM ELEMENTS ---
-        const authContainer = document.getElementById('auth-container');
-        const appContainer = document.getElementById('app-container');
-        const loadingOverlay = document.getElementById('loading-overlay');
-        const feedElement = document.getElementById('feed');
+        const loader = document.getElementById('loader');
+        const authView = document.getElementById('auth-container');
+        const appView = document.getElementById('app-container');
+        const feedBody = document.getElementById('feed');
 
-        // --- AUTH LOGIC ---
+        // --- AUTH OBSERVER ---
         onAuthStateChanged(auth, (user) => {
-            loadingOverlay.classList.add('hidden');
+            loader.classList.add('hidden');
             if (user) {
-                if (user.emailVerified) {
-                    authContainer.classList.add('hidden');
-                    appContainer.classList.remove('hidden');
-                    loadPosts();
+                if (user.emailVerified || user.providerData[0].providerId === 'google.com') {
+                    authView.classList.add('hidden');
+                    appView.classList.remove('hidden');
+                    initFeed();
                 } else {
-                    alert("Please verify your email first. Check your inbox.");
+                    alert("Please verify your email address to log in.");
                     signOut(auth);
-                    showAuth();
                 }
             } else {
-                showAuth();
+                appView.classList.add('hidden');
+                authView.classList.remove('hidden');
             }
         });
 
-        function showAuth() {
-            appContainer.classList.add('hidden');
-            authContainer.classList.remove('hidden');
-        }
-
-        document.getElementById('btn-signup').onclick = async () => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
+        // --- AUTH ACTIONS ---
+        document.getElementById('do-signup').onclick = async () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
             try {
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                await sendEmailVerification(cred.user);
-                alert("Verification email sent! Verify and then login.");
-                await signOut(auth);
-            } catch (e) { alert(e.message); }
+                const res = await createUserWithEmailAndPassword(auth, e, p);
+                await sendEmailVerification(res.user);
+                alert("Verification email sent! Check your inbox.");
+                signOut(auth);
+            } catch (err) { alert(err.message); }
         };
 
-        document.getElementById('btn-login').onclick = async () => {
-            const email = document.getElementById('auth-email').value;
-            const pass = document.getElementById('auth-password').value;
-            try { await signInWithEmailAndPassword(auth, email, pass); } 
-            catch (e) { alert(e.message); }
+        document.getElementById('do-login').onclick = async () => {
+            const e = document.getElementById('email').value;
+            const p = document.getElementById('password').value;
+            try { await signInWithEmailAndPassword(auth, e, p); } 
+            catch (err) { alert(err.message); }
         };
 
-        document.getElementById('btn-google').onclick = async () => {
-            try { await signInWithPopup(auth, googleProvider); }
-            catch (e) { alert(e.message); }
-        };
+        document.getElementById('do-google').onclick = () => signInWithPopup(auth, provider);
+        document.getElementById('do-logout').onclick = () => signOut(auth);
 
-        document.getElementById('btn-logout').onclick = () => signOut(auth);
+        // --- POSTING LOGIC ---
+        document.getElementById('do-post').onclick = async () => {
+            const file = document.getElementById('post-file').files[0];
+            const cap = document.getElementById('post-caption').value;
+            const btn = document.getElementById('do-post');
 
-        // --- CLOUDINARY UPLOAD ---
-        async function uploadImage(file) {
-            const formData = new FormData();
-            formData.append('file', file);
-            formData.append('upload_preset', CLOUDINARY_PRESET);
-            
-            const res = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-            const data = await res.json();
-            return data.secure_url;
-        }
-
-        // --- FIRESTORE LOGIC ---
-        document.getElementById('btn-post').onclick = async () => {
-            const fileInput = document.getElementById('post-file');
-            const caption = document.getElementById('post-caption').value;
-            const btn = document.getElementById('btn-post');
-
-            if (!fileInput.files[0]) return alert("Select an image");
+            if (!file) return alert("Pick an image first");
             
             btn.disabled = true;
             btn.innerText = "Uploading...";
 
             try {
-                const imageUrl = await uploadImage(fileInput.files[0]);
+                // Cloudinary Upload
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', CLOUDINARY_PRESET);
+
+                const cloudRes = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+                const cloudData = await cloudRes.json();
+
+                if (!cloudData.secure_url) throw new Error("Upload failed");
+
+                // Firestore Save
                 await addDoc(collection(db, "posts"), {
-                    username: auth.currentUser.email.split('@')[0],
-                    caption: caption,
-                    imageUrl: imageUrl,
-                    timestamp: serverTimestamp(),
-                    userId: auth.currentUser.uid
+                    user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+                    caption: cap,
+                    image: cloudData.secure_url,
+                    createdAt: serverTimestamp()
                 });
-                
-                fileInput.value = '';
+
+                document.getElementById('post-file').value = '';
                 document.getElementById('post-caption').value = '';
-                btn.innerText = "Post to Aura";
-            } catch (e) {
-                alert("Upload failed");
-                console.error(e);
+            } catch (err) {
+                alert("Error: " + err.message);
             } finally {
                 btn.disabled = false;
+                btn.innerText = "Post";
             }
         };
 
-        function loadPosts() {
-            const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
-            onSnapshot(q, (snapshot) => {
-                feedElement.innerHTML = '';
-                snapshot.forEach((doc) => {
-                    const post = doc.data();
-                    const postHTML = `
-                        <div class="post-card">
-                            <div class="post-header">
-                                <div class="avatar"></div>
-                                <span>${post.username}</span>
-                            </div>
-                            <img src="${post.imageUrl}" class="post-img" loading="lazy">
-                            <div class="post-content">
-                                <span class="post-user">${post.username}</span>
-                                <span class="post-caption">${post.caption}</span>
-                            </div>
+        // --- REAL-TIME FEED ---
+        function initFeed() {
+            const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+            onSnapshot(q, (snap) => {
+                feedBody.innerHTML = '';
+                snap.forEach(doc => {
+                    const data = doc.data();
+                    const el = document.createElement('div');
+                    el.className = 'post';
+                    el.innerHTML = `
+                        <div class="post-header">
+                            <div class="avatar"></div>
+                            <span class="username">${data.user}</span>
+                        </div>
+                        <img src="${data.image}" class="post-media" loading="lazy">
+                        <div class="post-footer">
+                            <p class="caption"><b>${data.user}</b>${data.caption}</p>
                         </div>
                     `;
-                    feedElement.insertAdjacentHTML('beforeend', postHTML);
+                    feedBody.appendChild(el);
                 });
             });
         }
