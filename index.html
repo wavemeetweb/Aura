@@ -1,336 +1,1408 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aura | Experience Moments</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap">
-    <style>
-        :root {
-            --bg: #050505;
-            --card: #121212;
-            --accent: #ffffff;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.08);
-            --text-muted: #a0a0a0;
-            --error: #ff4b4b;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aura</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        
-        body { 
-            background-color: var(--bg); 
-            color: white; 
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            overflow-x: hidden;
-        }
+    :root {
+      --bg:           #050505;
+      --surface:      #0e0e0e;
+      --card:         #121212;
+      --card-hover:   #1a1a1a;
+      --glass:        rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.08);
+      --primary:      #a78bfa;
+      --primary-dark: #7c3aed;
+      --primary-glow: rgba(167,139,250,0.25);
+      --accent:       #f472b6;
+      --text:         #f1f1f1;
+      --text-muted:   #6b7280;
+      --text-dim:     #9ca3af;
+      --danger:       #ef4444;
+      --success:      #22c55e;
+      --radius:       16px;
+      --radius-sm:    10px;
+      --transition:   0.25s cubic-bezier(0.4,0,0.2,1);
+    }
 
-        /* Helpers */
-        .hidden { display: none !important; }
-        .glass { background: var(--glass); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--border); }
+    html { scroll-behavior: smooth; }
 
-        /* Auth Screen */
-        #auth-container {
-            width: 100%;
-            max-width: 380px;
-            margin-top: 10vh;
-            padding: 40px;
-            border-radius: 28px;
-            text-align: center;
-            animation: fadeIn 0.8s ease-out;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
 
-        .logo { 
-            font-size: 3.5rem; 
-            font-weight: 600; 
-            margin-bottom: 2rem; 
-            letter-spacing: -3px;
-            background: linear-gradient(180deg, #fff 0%, #444 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+    /* ─── Scrollbar ──────────────────────────────────────── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 99px; }
 
-        input, textarea {
-            width: 100%;
-            padding: 14px 18px;
-            margin-bottom: 12px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            color: white;
-            outline: none;
-            transition: all 0.3s;
-        }
+    /* ─── Utility ────────────────────────────────────────── */
+    .hidden { display: none !important; }
 
-        input:focus { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.07); }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 22px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        button {
-            width: 100%;
-            padding: 14px;
-            border-radius: 14px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+      color: #fff;
+      box-shadow: 0 4px 20px var(--primary-glow);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 28px var(--primary-glow);
+    }
+    .btn-primary:active:not(:disabled) { transform: translateY(0); }
 
-        .btn-primary { background: white; color: black; margin-top: 10px; }
-        .btn-primary:hover { transform: scale(1.02); opacity: 0.95; }
-        .btn-secondary { background: transparent; color: white; border: 1px solid var(--border); margin-top: 10px; }
-        .btn-secondary:hover { background: rgba(255,255,255,0.05); }
+    .btn-glass {
+      background: var(--glass);
+      color: var(--text);
+      border: 1px solid var(--glass-border);
+    }
+    .btn-glass:hover:not(:disabled) {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.14);
+    }
 
-        /* App Layout */
-        #app-container {
-            width: 100%;
-            max-width: 480px;
-            padding: 20px;
-            animation: slideUp 0.6s ease-out;
-        }
+    .btn-google {
+      background: #fff;
+      color: #1f1f1f;
+      border: 1px solid #e5e7eb;
+    }
+    .btn-google:hover:not(:disabled) {
+      background: #f9f9f9;
+      transform: translateY(-1px);
+    }
 
-        nav {
-            position: sticky;
-            top: 20px;
-            z-index: 100;
-            padding: 14px 24px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-radius: 20px;
-            margin-bottom: 30px;
-        }
+    .btn-danger {
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      border: 1px solid rgba(239,68,68,0.2);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: rgba(239,68,68,0.2);
+    }
 
-        .upload-card {
-            padding: 24px;
-            border-radius: 24px;
-            margin-bottom: 40px;
-        }
+    .btn-full { width: 100%; }
 
-        #post-file { border: 1px dashed var(--border); cursor: pointer; }
+    input, textarea {
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 14px;
+      padding: 12px 16px;
+      width: 100%;
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+    input::placeholder, textarea::placeholder { color: var(--text-muted); }
+    input:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-glow);
+    }
 
-        /* Feed Cards */
-        .post {
-            background: var(--card);
-            border: 1px solid var(--border);
-            border-radius: 28px;
-            margin-bottom: 30px;
-            overflow: hidden;
-            animation: postFade 0.5s ease-out;
-        }
+    /* ─── Toast ──────────────────────────────────────────── */
+    #toast-container {
+      position: fixed;
+      top: 24px;
+      right: 24px;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+    }
+    .toast {
+      background: var(--card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      animation: slideIn 0.3s ease, fadeOut 0.4s ease 2.6s forwards;
+      pointer-events: all;
+      max-width: 320px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .toast.success { border-color: rgba(34,197,94,0.4); }
+    .toast.error   { border-color: rgba(239,68,68,0.4); }
+    .toast.info    { border-color: var(--primary-glow); }
+    .toast-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .toast.success .toast-dot { background: var(--success); }
+    .toast.error   .toast-dot { background: var(--danger); }
+    .toast.info    .toast-dot { background: var(--primary); }
 
-        .post-header {
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+    @keyframes slideIn {
+      from { opacity:0; transform: translateX(40px); }
+      to   { opacity:1; transform: translateX(0); }
+    }
+    @keyframes fadeOut {
+      to { opacity:0; transform: translateX(40px); }
+    }
 
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #1a1a1a, #333);
-            border: 1px solid var(--border);
-        }
+    /* ─── Loader ─────────────────────────────────────────── */
+    #global-loader {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 9998;
+      transition: opacity 0.4s ease;
+    }
+    #global-loader.fade { opacity: 0; pointer-events: none; }
+    .logo-spin {
+      width: 56px; height: 56px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); box-shadow: 0 0 0 0 var(--primary-glow); }
+      50%      { transform: scale(1.06); box-shadow: 0 0 0 12px transparent; }
+    }
+    .loader-spinner {
+      width: 28px; height: 28px;
+      border: 2.5px solid var(--glass-border);
+      border-top-color: var(--primary);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .username { font-weight: 600; font-size: 0.9rem; letter-spacing: -0.3px; }
+    /* ─── Auth Section ───────────────────────────────────── */
+    #auth-section {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    #auth-section::before {
+      content: '';
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(124,58,237,0.12) 0%, transparent 70%);
+      top: -200px; left: -200px;
+      pointer-events: none;
+    }
+    #auth-section::after {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(244,114,182,0.08) 0%, transparent 70%);
+      bottom: -150px; right: -150px;
+      pointer-events: none;
+    }
 
-        .post-media {
-            width: 100%;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            background: #000;
-            display: block;
-        }
+    .auth-card {
+      background: rgba(18,18,18,0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.5s ease;
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(24px); }
+      to   { opacity:1; transform: translateY(0); }
+    }
 
-        .post-footer { padding: 20px; }
-        .caption { font-size: 0.95rem; line-height: 1.5; color: #efefef; }
-        .caption b { margin-right: 8px; font-weight: 600; }
+    .auth-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .auth-logo-icon {
+      width: 44px; height: 44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .auth-logo-text {
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-        /* Loading & Animations */
-        #loader {
-            position: fixed; inset: 0; background: var(--bg);
-            display: flex; align-items: center; justify-content: center;
-            z-index: 9999; font-weight: 300; letter-spacing: 8px;
-        }
+    .auth-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .auth-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
 
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes postFade { from { opacity: 0; scale: 0.95; } to { opacity: 1; scale: 1; } }
-    </style>
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 20px 0;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .divider::before, .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--glass-border);
+    }
+
+    .auth-switch {
+      text-align: center;
+      margin-top: 22px;
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .auth-switch a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .auth-switch a:hover { text-decoration: underline; }
+
+    .verify-banner {
+      background: rgba(167,139,250,0.1);
+      border: 1px solid rgba(167,139,250,0.25);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+    }
+    .verify-banner strong { color: var(--primary); }
+
+    /* ─── App Layout ─────────────────────────────────────── */
+    #app-section {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ─── Navbar ─────────────────────────────────────────── */
+    #navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(5,5,5,0.85);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+      padding: 0 24px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 34px; height: 34px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--primary-dark), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    .nav-logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      background: var(--glass);
+      border: 1px solid var(--glass-border);
+    }
+    .nav-avatar {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-dark), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+    .nav-avatar img {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .nav-username {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-dim);
+      max-width: 120px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    /* ─── Main Content ───────────────────────────────────── */
+    .app-content {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 28px 16px 80px;
+      width: 100%;
+    }
+
+    /* ─── Create Post Card ───────────────────────────────── */
+    .create-card {
+      background: var(--card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 28px;
+      transition: box-shadow var(--transition);
+    }
+    .create-card:hover {
+      box-shadow: 0 0 0 1px rgba(167,139,250,0.15);
+    }
+
+    .create-header {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .create-header span { font-size: 18px; }
+
+    .upload-zone {
+      border: 2px dashed var(--glass-border);
+      border-radius: var(--radius-sm);
+      padding: 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all var(--transition);
+      margin-bottom: 14px;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-zone:hover {
+      border-color: var(--primary);
+      background: rgba(167,139,250,0.05);
+    }
+    .upload-zone.drag-over {
+      border-color: var(--primary);
+      background: rgba(167,139,250,0.08);
+      transform: scale(1.01);
+    }
+    .upload-zone input[type="file"] {
+      position: absolute; inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .upload-icon { font-size: 32px; margin-bottom: 8px; }
+    .upload-text { font-size: 14px; color: var(--text-muted); }
+    .upload-text strong { color: var(--primary); }
+
+    .preview-wrap {
+      position: relative;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    #img-preview {
+      width: 100%;
+      max-height: 320px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      display: block;
+    }
+    .preview-remove {
+      position: absolute;
+      top: 10px; right: 10px;
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+    }
+    .preview-remove:hover { background: var(--danger); }
+
+    .post-progress {
+      height: 3px;
+      background: var(--glass);
+      border-radius: 99px;
+      overflow: hidden;
+      margin-bottom: 14px;
+    }
+    .post-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary-dark), var(--accent));
+      border-radius: 99px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    /* ─── Feed ───────────────────────────────────────────── */
+    #feed {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .post-card {
+      background: var(--card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      animation: fadeUp 0.4s ease;
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .post-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.35);
+    }
+
+    .post-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+    }
+    .post-avatar {
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary-dark), var(--accent));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+      border: 2px solid rgba(167,139,250,0.3);
+    }
+    .post-avatar img {
+      width: 100%; height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .post-meta { flex: 1; min-width: 0; }
+    .post-username {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .post-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    .post-image-wrap { position: relative; }
+    .post-image {
+      width: 100%;
+      max-height: 520px;
+      object-fit: cover;
+      display: block;
+      cursor: pointer;
+      transition: opacity var(--transition);
+    }
+    .post-image:hover { opacity: 0.96; }
+
+    .post-footer {
+      padding: 14px 16px;
+    }
+    .post-caption {
+      font-size: 14px;
+      line-height: 1.55;
+      color: var(--text-dim);
+    }
+    .post-caption strong {
+      color: var(--text);
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    /* ─── Empty state ────────────────────────────────────── */
+    .empty-state {
+      text-align: center;
+      padding: 64px 24px;
+      color: var(--text-muted);
+      animation: fadeUp 0.5s ease;
+    }
+    .empty-icon { font-size: 56px; margin-bottom: 16px; opacity: 0.5; }
+    .empty-title { font-size: 18px; font-weight: 600; color: var(--text-dim); margin-bottom: 6px; }
+    .empty-sub { font-size: 14px; }
+
+    /* ─── Feed Loader ────────────────────────────────────── */
+    .feed-loader {
+      display: flex;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    /* ─── Skeleton ───────────────────────────────────────── */
+    .skeleton-card {
+      background: var(--card);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .skeleton-header { display: flex; align-items: center; gap: 12px; padding: 14px 16px; }
+    .sk { background: linear-gradient(90deg, #1a1a1a 25%, #242424 50%, #1a1a1a 75%);
+          background-size: 200% 100%;
+          animation: shimmer 1.4s infinite;
+          border-radius: 6px; }
+    .sk-circle { border-radius: 50%; width: 38px; height: 38px; flex-shrink: 0; }
+    .sk-line { height: 12px; flex: 1; }
+    .sk-line.short { max-width: 80px; margin-top: 6px; }
+    .sk-image { width: 100%; height: 280px; }
+    .sk-caption { height: 14px; margin: 14px 16px; max-width: 70%; }
+    @keyframes shimmer {
+      to { background-position: -200% 0; }
+    }
+
+    /* ─── Lightbox ───────────────────────────────────────── */
+    #lightbox {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,0.92);
+      backdrop-filter: blur(12px);
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      animation: fadeIn 0.25s ease;
+      cursor: zoom-out;
+    }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    #lightbox img {
+      max-width: 100%;
+      max-height: 90vh;
+      border-radius: var(--radius-sm);
+      box-shadow: 0 24px 80px rgba(0,0,0,0.8);
+      cursor: default;
+    }
+    #lightbox-close {
+      position: fixed;
+      top: 20px; right: 20px;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      color: #fff;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition);
+    }
+    #lightbox-close:hover { background: rgba(255,255,255,0.2); }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 480px) {
+      .auth-card { padding: 32px 22px; }
+      #navbar { padding: 0 16px; }
+      .nav-username { display: none; }
+    }
+  </style>
 </head>
 <body>
 
-    <div id="loader">AURA</div>
+  <!-- Global loader -->
+  <div id="global-loader">
+    <div class="logo-spin">✦</div>
+    <div class="loader-spinner"></div>
+  </div>
 
-    <div id="auth-container" class="glass hidden">
-        <h1 class="logo">aura</h1>
-        <div id="auth-form">
-            <input type="email" id="email" placeholder="Email address">
-            <input type="password" id="password" placeholder="Password">
-            <button id="do-login" class="btn-primary">Sign In</button>
-            <button id="do-signup" class="btn-secondary">Create Account</button>
-            <div style="margin: 20px 0; color: var(--text-muted); font-size: 0.8rem;">OR</div>
-            <button id="do-google" class="btn-secondary">Continue with Google</button>
+  <!-- Toast container -->
+  <div id="toast-container"></div>
+
+  <!-- Lightbox -->
+  <div id="lightbox" class="hidden">
+    <button id="lightbox-close" aria-label="Close">✕</button>
+    <img id="lightbox-img" src="" alt="Post image" />
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════
+       AUTH SECTION
+  ═══════════════════════════════════════════════════════ -->
+  <section id="auth-section" class="hidden">
+    <div class="auth-card">
+
+      <div class="auth-logo">
+        <div class="auth-logo-icon">✦</div>
+        <span class="auth-logo-text">aura</span>
+      </div>
+
+      <!-- Login Panel -->
+      <div id="login-panel">
+        <h1 class="auth-title">Welcome back</h1>
+        <p class="auth-subtitle">Sign in to your account to continue</p>
+
+        <div id="verify-banner" class="verify-banner hidden">
+          <strong>Check your inbox!</strong> We sent a verification link to your email.
+          Verify it and then sign in.
         </div>
-    </div>
 
-    <div id="app-container" class="hidden">
-        <nav class="glass">
-            <span style="font-weight: 600; font-size: 1.4rem; letter-spacing: -1.5px;">aura</span>
-            <button id="do-logout" style="width: auto; padding: 6px 16px; font-size: 0.75rem;" class="btn-secondary">Logout</button>
-        </nav>
-
-        <div class="upload-card glass">
-            <p style="margin-bottom: 16px; font-weight: 500; font-size: 0.9rem;">Share something...</p>
-            <input type="file" id="post-file" accept="image/*">
-            <textarea id="post-caption" placeholder="Write a caption..." rows="2"></textarea>
-            <button id="do-post" class="btn-primary">Post</button>
+        <div class="form-group">
+          <input type="email" id="login-email" placeholder="Email address" autocomplete="email" />
+          <input type="password" id="login-password" placeholder="Password" autocomplete="current-password" />
         </div>
 
-        <div id="feed"></div>
+        <button class="btn btn-primary btn-full" id="btn-login">Sign In</button>
+
+        <div class="divider">or</div>
+
+        <button class="btn btn-google btn-full" id="btn-google-login">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Continue with Google
+        </button>
+
+        <p class="auth-switch">
+          Don't have an account? <a id="go-signup">Create one</a>
+        </p>
+      </div>
+
+      <!-- Signup Panel -->
+      <div id="signup-panel" class="hidden">
+        <h1 class="auth-title">Create account</h1>
+        <p class="auth-subtitle">Join Aura and share your moments</p>
+
+        <div class="form-group">
+          <input type="text"  id="signup-name"     placeholder="Display name" autocomplete="name" />
+          <input type="email" id="signup-email"    placeholder="Email address" autocomplete="email" />
+          <input type="password" id="signup-password" placeholder="Password (min. 6 chars)" autocomplete="new-password" />
+        </div>
+
+        <button class="btn btn-primary btn-full" id="btn-signup">Create Account</button>
+
+        <div class="divider">or</div>
+
+        <button class="btn btn-google btn-full" id="btn-google-signup">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>
+          Sign up with Google
+        </button>
+
+        <p class="auth-switch">
+          Already have an account? <a id="go-login">Sign in</a>
+        </p>
+      </div>
+
     </div>
+  </section>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { 
-            getAuth, onAuthStateChanged, signInWithEmailAndPassword, 
-            createUserWithEmailAndPassword, signOut, GoogleAuthProvider, 
-            signInWithPopup, sendEmailVerification 
-        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { 
-            getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp 
-        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <!-- ══════════════════════════════════════════════════════
+       APP SECTION
+  ═══════════════════════════════════════════════════════ -->
+  <section id="app-section" class="hidden">
 
-        // Your Configs
-        const firebaseConfig = {
-            apiKey: "AIzaSyATSioQeAc2A9BoGzv8S8o53f6-iDcWVr4",
-            authDomain: "aurapers0n.firebaseapp.com",
-            projectId: "aurapers0n",
-            storageBucket: "aurapers0n.firebasestorage.app",
-            messagingSenderId: "180300314364",
-            appId: "1:180300314364:web:1cf8bf819d17ac2f324979"
-        };
+    <!-- Navbar -->
+    <nav id="navbar">
+      <a class="nav-logo" href="#">
+        <div class="nav-logo-icon">✦</div>
+        <span class="nav-logo-text">aura</span>
+      </a>
+      <div class="nav-right">
+        <div class="nav-user">
+          <div class="nav-avatar" id="nav-avatar-wrap"></div>
+          <span class="nav-username" id="nav-username-text"></span>
+        </div>
+        <button class="btn btn-glass" id="btn-logout" style="padding:10px 16px;">
+          Sign Out
+        </button>
+      </div>
+    </nav>
 
-        const CLOUDINARY_URL = "https://api.cloudinary.com/v1_1/dx7tyxquo/image/upload";
-        const CLOUDINARY_PRESET = "aura_posts";
+    <!-- Content -->
+    <div class="app-content">
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-        const provider = new GoogleAuthProvider();
+      <!-- Create Post -->
+      <div class="create-card">
+        <div class="create-header">
+          <span>✨</span> Share a moment
+        </div>
 
-        const loader = document.getElementById('loader');
-        const authView = document.getElementById('auth-container');
-        const appView = document.getElementById('app-container');
-        const feedBody = document.getElementById('feed');
+        <!-- Upload zone / preview -->
+        <div id="upload-zone" class="upload-zone">
+          <input type="file" id="img-input" accept="image/*" />
+          <div class="upload-icon">🖼️</div>
+          <div class="upload-text">
+            <strong>Click to upload</strong> or drag & drop<br/>
+            <span style="font-size:12px;margin-top:4px;display:block;">PNG, JPG, GIF, WEBP</span>
+          </div>
+        </div>
 
-        // --- AUTH OBSERVER ---
-        onAuthStateChanged(auth, (user) => {
-            loader.classList.add('hidden');
-            if (user) {
-                if (user.emailVerified || user.providerData[0].providerId === 'google.com') {
-                    authView.classList.add('hidden');
-                    appView.classList.remove('hidden');
-                    initFeed();
-                } else {
-                    alert("Please verify your email address to log in.");
-                    signOut(auth);
-                }
-            } else {
-                appView.classList.add('hidden');
-                authView.classList.remove('hidden');
-            }
+        <div id="preview-wrap" class="preview-wrap hidden">
+          <img id="img-preview" src="" alt="Preview" />
+          <button class="preview-remove" id="btn-remove-img" title="Remove image">✕</button>
+        </div>
+
+        <div class="post-progress hidden" id="post-progress">
+          <div class="post-progress-bar" id="post-progress-bar"></div>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <textarea id="caption-input" placeholder="Write a caption…" rows="2"
+            style="resize:vertical;min-height:60px;"></textarea>
+        </div>
+
+        <button class="btn btn-primary btn-full" id="btn-post">
+          Post to Aura
+        </button>
+      </div>
+
+      <!-- Feed -->
+      <div id="feed"></div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════
+       SCRIPT
+  ═══════════════════════════════════════════════════════ -->
+  <script type="module">
+    /* ── Global error guards ─────────────────────────────────── */
+    window.onerror = (msg, src, line, col, err) => {
+      console.error('Global error:', err || msg);
+      const loaderEl = document.getElementById('global-loader');
+      if (loaderEl && !loaderEl.classList.contains('hidden')) {
+        loaderEl.classList.add('fade');
+        setTimeout(() => loaderEl.classList.add('hidden'), 450);
+        document.getElementById('auth-section').classList.remove('hidden');
+        toast('Failed to load — check the console.', 'error');
+      }
+    };
+    window.addEventListener('unhandledrejection', ev => {
+      console.error('Unhandled promise rejection:', ev.reason);
+    });
+
+    /* ── Firebase SDK ─────────────────────────────────────── */
+    import { initializeApp }                        from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
+    import {
+      getAuth,
+      createUserWithEmailAndPassword,
+      signInWithEmailAndPassword,
+      signInWithPopup,
+      GoogleAuthProvider,
+      onAuthStateChanged,
+      signOut,
+      updateProfile,
+      sendEmailVerification
+    }                                               from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      onSnapshot,
+      orderBy,
+      query,
+      serverTimestamp,
+      limit
+    }                                               from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+
+    /* ── Config ───────────────────────────────────────────── */
+    const FIREBASE_CONFIG = {
+      apiKey:            "AIzaSyBBXlMsVKCVZg7wkw2CjWeetnGkpINV_M4",
+      authDomain:        "webnexus-cdc47.firebaseapp.com",
+      projectId:         "webnexus-cdc47",
+      storageBucket:     "webnexus-cdc47.firebasestorage.app",
+      messagingSenderId: "185823698270",
+      appId:             "1:185823698270:web:b92eb6507a6974e46043cf",
+      measurementId:     "G-59DS94R3BX"
+    };
+
+    const CLOUDINARY_CLOUD  = "dx7tyxquo";
+    const CLOUDINARY_PRESET = "aura_posts";
+    const CLOUDINARY_URL    = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`;
+
+    /* ── Init ─────────────────────────────────────────────── */
+    const app      = initializeApp(FIREBASE_CONFIG);
+    const auth     = getAuth(app);
+    const db       = getFirestore(app);
+    const gProvider = new GoogleAuthProvider();
+
+    /* ── State ────────────────────────────────────────────── */
+    let currentUser     = null;
+    let selectedFile    = null;
+    let unsubscribeFeed = null;
+    let postsRendered   = false;
+
+    /* ── DOM Refs ─────────────────────────────────────────── */
+    const $  = id => document.getElementById(id);
+    const loader        = $('global-loader');
+    const authSection   = $('auth-section');
+    const appSection    = $('app-section');
+    const loginPanel    = $('login-panel');
+    const signupPanel   = $('signup-panel');
+    const verifyBanner  = $('verify-banner');
+    const feed          = $('feed');
+    const uploadZone    = $('upload-zone');
+    const imgInput      = $('img-input');
+    const imgPreview    = $('img-preview');
+    const previewWrap   = $('preview-wrap');
+    const progressWrap  = $('post-progress');
+    const progressBar   = $('post-progress-bar');
+    const captionInput  = $('caption-input');
+    const lightbox      = $('lightbox');
+    const lightboxImg   = $('lightbox-img');
+
+    /* ── Toast ────────────────────────────────────────────── */
+    function toast(msg, type = 'info') {
+      const container = $('toast-container');
+      const el = document.createElement('div');
+      el.className = `toast ${type}`;
+      el.innerHTML = `<div class="toast-dot"></div><span>${msg}</span>`;
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 3100);
+    }
+
+    /* ── Safety net: force-dismiss loader after 10s ──────────── */
+    const loaderTimeout = setTimeout(() => {
+      hideLoader();
+      showAuth();
+      toast('Connection is slow — check your internet.', 'error');
+    }, 10000);
+
+    /* ── Auth State ───────────────────────────────────────── */
+    onAuthStateChanged(auth, user => {
+      clearTimeout(loaderTimeout);
+      hideLoader();
+      if (user) {
+        if (!user.emailVerified && user.providerData[0]?.providerId === 'password') {
+          showAuth();
+          verifyBanner.classList.remove('hidden');
+          toast('Please verify your email first.', 'error');
+          signOut(auth);
+          return;
+        }
+        currentUser = user;
+        showApp(user);
+      } else {
+        currentUser = null;
+        showAuth();
+        if (unsubscribeFeed) { unsubscribeFeed(); unsubscribeFeed = null; }
+      }
+    });
+
+    function hideLoader() {
+      if (loader.classList.contains('hidden')) return;
+      loader.classList.add('fade');
+      setTimeout(() => loader.classList.add('hidden'), 450);
+    }
+
+    function showAuth() {
+      authSection.classList.remove('hidden');
+      appSection.classList.add('hidden');
+      // Clear feed so stale cards don't show on re-login
+      feed.innerHTML = '';
+      postsRendered = false;
+    }
+
+    function showApp(user) {
+      authSection.classList.add('hidden');
+      appSection.classList.remove('hidden');
+      renderNavUser(user);
+      if (!postsRendered) {
+        startFeed();
+        postsRendered = true;
+      }
+    }
+
+    /* ── Navbar User ──────────────────────────────────────── */
+    function renderNavUser(user) {
+      const wrap   = $('nav-avatar-wrap');
+      const nameEl = $('nav-username-text');
+      const name   = user.displayName || user.email?.split('@')[0] || 'User';
+      nameEl.textContent = name;
+      if (user.photoURL) {
+        wrap.innerHTML = `<img src="${escHtml(user.photoURL)}" alt="${escHtml(name)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;" />`;
+      } else {
+        wrap.innerHTML = `<span>${escHtml(name[0].toUpperCase())}</span>`;
+      }
+    }
+
+    /* ── Auth: Panel Toggle ───────────────────────────────── */
+    $('go-signup').addEventListener('click', () => {
+      loginPanel.classList.add('hidden');
+      signupPanel.classList.remove('hidden');
+      verifyBanner.classList.add('hidden');
+    });
+    $('go-login').addEventListener('click', () => {
+      signupPanel.classList.add('hidden');
+      loginPanel.classList.remove('hidden');
+    });
+
+    // Enter key submits the visible auth form (only when auth section is shown)
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Enter') return;
+      if (authSection.classList.contains('hidden')) return; // not on auth screen
+      if (!loginPanel.classList.contains('hidden'))  $('btn-login').click();
+      else if (!signupPanel.classList.contains('hidden')) $('btn-signup').click();
+    });
+
+    /* ── Auth: Sign Up ────────────────────────────────────── */
+    $('btn-signup').addEventListener('click', async () => {
+      const name     = $('signup-name').value.trim();
+      const email    = $('signup-email').value.trim();
+      const password = $('signup-password').value;
+      if (!name || !email || !password) { toast('Please fill all fields.', 'error'); return; }
+      setLoading('btn-signup', true);
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(cred.user, { displayName: name });
+        await sendEmailVerification(cred.user);
+        await signOut(auth);
+        signupPanel.classList.add('hidden');
+        loginPanel.classList.remove('hidden');
+        verifyBanner.classList.remove('hidden');
+        toast('Account created! Please verify your email.', 'success');
+      } catch (e) {
+        toast(friendlyError(e.code), 'error');
+      } finally {
+        setLoading('btn-signup', false);
+      }
+    });
+
+    /* ── Auth: Sign In ────────────────────────────────────── */
+    $('btn-login').addEventListener('click', async () => {
+      const email    = $('login-email').value.trim();
+      const password = $('login-password').value;
+      if (!email || !password) { toast('Please enter email and password.', 'error'); return; }
+      setLoading('btn-login', true);
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast('Welcome back! 👋', 'success');
+      } catch (e) {
+        toast(friendlyError(e.code), 'error');
+      } finally {
+        setLoading('btn-login', false);
+      }
+    });
+
+    /* ── Auth: Google ─────────────────────────────────────── */
+    async function googleSignIn(btnId) {
+      setLoading(btnId, true);
+      try {
+        await signInWithPopup(auth, gProvider);
+        toast('Signed in with Google ✦', 'success');
+      } catch (e) {
+        toast(friendlyError(e.code), 'error');
+      } finally {
+        setLoading(btnId, false);
+      }
+    }
+    $('btn-google-login').addEventListener('click',  () => googleSignIn('btn-google-login'));
+    $('btn-google-signup').addEventListener('click', () => googleSignIn('btn-google-signup'));
+
+    /* ── Auth: Sign Out ───────────────────────────────────── */
+    $('btn-logout').addEventListener('click', async () => {
+      await signOut(auth);
+      postsRendered = false;
+      toast('See you next time ✦', 'info');
+    });
+
+    /* ── Image Selection ──────────────────────────────────── */
+    imgInput.addEventListener('change', e => {
+      const file = e.target.files[0];
+      if (file) selectImage(file);
+    });
+
+    uploadZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      uploadZone.classList.add('drag-over');
+    });
+    uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag-over'));
+    uploadZone.addEventListener('drop', e => {
+      e.preventDefault();
+      uploadZone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) selectImage(file);
+    });
+
+    function selectImage(file) {
+      selectedFile = file;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        imgPreview.src = ev.target.result;
+        uploadZone.classList.add('hidden');
+        previewWrap.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    $('btn-remove-img').addEventListener('click', () => {
+      selectedFile = null;
+      imgInput.value = '';
+      imgPreview.src = '';
+      previewWrap.classList.add('hidden');
+      uploadZone.classList.remove('hidden');
+    });
+
+    /* ── Create Post ──────────────────────────────────────── */
+    $('btn-post').addEventListener('click', async () => {
+      if (!currentUser) return;
+      if (!selectedFile) { toast('Please select an image.', 'error'); return; }
+      const caption = captionInput.value.trim();
+
+      setLoading('btn-post', true);
+      progressWrap.classList.remove('hidden');
+      setProgress(10);
+
+      try {
+        /* Upload to Cloudinary */
+        const formData = new FormData();
+        formData.append('file',        selectedFile);
+        formData.append('upload_preset', CLOUDINARY_PRESET);
+
+        setProgress(30);
+        const res  = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
+        setProgress(70);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData?.error?.message || `Cloudinary error (${res.status}).`);
+        }
+        const data = await res.json();
+        if (!data.secure_url) throw new Error('Cloudinary upload failed — no URL returned.');
+
+        /* Save to Firestore */
+        setProgress(85);
+        await addDoc(collection(db, 'posts'), {
+          imageUrl:    data.secure_url,
+          caption:     caption,
+          username:    currentUser.displayName || currentUser.email?.split('@')[0] || 'Anon',
+          userPhoto:   currentUser.photoURL || null,
+          uid:         currentUser.uid,
+          createdAt:   serverTimestamp()
         });
 
-        // --- AUTH ACTIONS ---
-        document.getElementById('do-signup').onclick = async () => {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            try {
-                const res = await createUserWithEmailAndPassword(auth, e, p);
-                await sendEmailVerification(res.user);
-                alert("Verification email sent! Check your inbox.");
-                signOut(auth);
-            } catch (err) { alert(err.message); }
-        };
+        setProgress(100);
+        toast('Post shared ✦', 'success');
 
-        document.getElementById('do-login').onclick = async () => {
-            const e = document.getElementById('email').value;
-            const p = document.getElementById('password').value;
-            try { await signInWithEmailAndPassword(auth, e, p); } 
-            catch (err) { alert(err.message); }
-        };
+        /* Reset form */
+        selectedFile    = null;
+        imgInput.value  = '';
+        imgPreview.src  = '';
+        captionInput.value = '';
+        previewWrap.classList.add('hidden');
+        uploadZone.classList.remove('hidden');
 
-        document.getElementById('do-google').onclick = () => signInWithPopup(auth, provider);
-        document.getElementById('do-logout').onclick = () => signOut(auth);
+      } catch (e) {
+        console.error(e);
+        toast(e.message || 'Something went wrong.', 'error');
+      } finally {
+        setLoading('btn-post', false);
+        setTimeout(() => {
+          progressWrap.classList.add('hidden');
+          setProgress(0);
+        }, 600);
+      }
+    });
 
-        // --- POSTING LOGIC ---
-        document.getElementById('do-post').onclick = async () => {
-            const file = document.getElementById('post-file').files[0];
-            const cap = document.getElementById('post-caption').value;
-            const btn = document.getElementById('do-post');
+    function setProgress(pct) {
+      progressBar.style.width = pct + '%';
+    }
 
-            if (!file) return alert("Pick an image first");
-            
-            btn.disabled = true;
-            btn.innerText = "Uploading...";
+    /* ── Feed ─────────────────────────────────────────────── */
+    function startFeed() {
+      // Show skeletons while first snapshot loads
+      feed.innerHTML = `
+        <div class="skeleton-card" id="sk1">
+          <div class="skeleton-header">
+            <div class="sk sk-circle"></div>
+            <div style="flex:1">
+              <div class="sk sk-line" style="max-width:120px;"></div>
+              <div class="sk sk-line short"></div>
+            </div>
+          </div>
+          <div class="sk sk-image"></div>
+          <div class="sk sk-caption"></div>
+        </div>
+        <div class="skeleton-card" id="sk2">
+          <div class="skeleton-header">
+            <div class="sk sk-circle"></div>
+            <div style="flex:1">
+              <div class="sk sk-line" style="max-width:140px;"></div>
+              <div class="sk sk-line short"></div>
+            </div>
+          </div>
+          <div class="sk sk-image" style="height:220px;"></div>
+          <div class="sk sk-caption" style="max-width:55%;"></div>
+        </div>`;
 
-            try {
-                // Cloudinary Upload
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', CLOUDINARY_PRESET);
-
-                const cloudRes = await fetch(CLOUDINARY_URL, { method: 'POST', body: formData });
-                const cloudData = await cloudRes.json();
-
-                if (!cloudData.secure_url) throw new Error("Upload failed");
-
-                // Firestore Save
-                await addDoc(collection(db, "posts"), {
-                    user: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
-                    caption: cap,
-                    image: cloudData.secure_url,
-                    createdAt: serverTimestamp()
-                });
-
-                document.getElementById('post-file').value = '';
-                document.getElementById('post-caption').value = '';
-            } catch (err) {
-                alert("Error: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Post";
-            }
-        };
-
-        // --- REAL-TIME FEED ---
-        function initFeed() {
-            const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-            onSnapshot(q, (snap) => {
-                feedBody.innerHTML = '';
-                snap.forEach(doc => {
-                    const data = doc.data();
-                    const el = document.createElement('div');
-                    el.className = 'post';
-                    el.innerHTML = `
-                        <div class="post-header">
-                            <div class="avatar"></div>
-                            <span class="username">${data.user}</span>
-                        </div>
-                        <img src="${data.image}" class="post-media" loading="lazy">
-                        <div class="post-footer">
-                            <p class="caption"><b>${data.user}</b>${data.caption}</p>
-                        </div>
-                    `;
-                    feedBody.appendChild(el);
-                });
-            });
+      const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(40));
+      unsubscribeFeed = onSnapshot(q, snapshot => {
+        removeSkeletons();
+        if (snapshot.empty) {
+          renderEmpty();
+          return;
         }
-    </script>
+        renderPosts(snapshot.docs);
+      }, err => {
+        console.error(err);
+        removeSkeletons();
+        toast('Failed to load feed.', 'error');
+      });
+    }
+
+    function removeSkeletons() {
+      ['sk1','sk2'].forEach(id => { const el = $(id); if (el) el.remove(); });
+    }
+
+    function renderEmpty() {
+      feed.innerHTML = `
+        <div class="empty-state">
+          <div class="empty-icon">✦</div>
+          <div class="empty-title">No posts yet</div>
+          <div class="empty-sub">Be the first to share your aura.</div>
+        </div>`;
+    }
+
+    function renderPosts(docs) {
+      /* Remove empty state if present */
+      const empty = feed.querySelector('.empty-state');
+      if (empty) empty.remove();
+
+      /* Build a map of current rendered post ids */
+      const existingIds = new Set(
+        [...feed.querySelectorAll('.post-card')].map(el => el.dataset.id)
+      );
+
+      docs.forEach(docSnap => {
+        const id = docSnap.id;
+        if (existingIds.has(id)) return; // already rendered
+
+        const data = docSnap.data();
+        const card = buildPostCard(id, data);
+
+        /* Insert in correct order (newest first) */
+        const allCards = [...feed.querySelectorAll('.post-card')];
+        const createdAt = data.createdAt?.seconds ?? Infinity;
+
+        let inserted = false;
+        for (const c of allCards) {
+          if ((c.dataset.ts ?? 0) < createdAt) {
+            feed.insertBefore(card, c);
+            inserted = true;
+            break;
+          }
+        }
+        if (!inserted) feed.appendChild(card);
+      });
+
+      /* Remove cards that no longer exist in snapshot */
+      const snapshotIds = new Set(docs.map(d => d.id));
+      feed.querySelectorAll('.post-card').forEach(el => {
+        if (!snapshotIds.has(el.dataset.id)) el.remove();
+      });
+
+      if (!feed.querySelector('.post-card')) renderEmpty();
+    }
+
+    function buildPostCard(id, data) {
+      const { imageUrl, caption, username, userPhoto, createdAt } = data;
+      const time = createdAt?.toDate ? timeAgo(createdAt.toDate()) : 'just now';
+      const initial = (username?.[0] || '?').toUpperCase();
+
+      const card = document.createElement('div');
+      card.className   = 'post-card';
+      card.dataset.id  = id;
+      card.dataset.ts  = createdAt?.seconds ?? 0;
+
+      card.innerHTML = `
+        <div class="post-header">
+          <div class="post-avatar">
+            ${userPhoto
+              ? `<img src="${escHtml(userPhoto)}" alt="${escHtml(username)}" />`
+              : initial}
+          </div>
+          <div class="post-meta">
+            <div class="post-username">${escHtml(username)}</div>
+            <div class="post-time">${time}</div>
+          </div>
+        </div>
+        <div class="post-image-wrap">
+          <img
+            class="post-image"
+            src="${escHtml(imageUrl)}"
+            alt="Post by ${escHtml(username)}"
+            loading="lazy"
+          />
+        </div>
+        ${caption ? `
+        <div class="post-footer">
+          <p class="post-caption">
+            <strong>${escHtml(username)}</strong>${escHtml(caption)}
+          </p>
+        </div>` : ''}
+      `;
+
+      /* Lightbox on image click */
+      card.querySelector('.post-image').addEventListener('click', () => {
+        lightboxImg.src = imageUrl;
+        lightbox.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+      });
+
+      return card;
+    }
+
+    /* ── Lightbox ─────────────────────────────────────────── */
+    function closeLightbox() {
+      lightbox.classList.add('hidden');
+      lightboxImg.src = '';
+      document.body.style.overflow = '';
+    }
+    $('lightbox-close').addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+
+    /* ── Helpers ──────────────────────────────────────────── */
+    function setLoading(btnId, loading) {
+      const btn = $(btnId);
+      if (!btn) return;
+      btn.disabled = loading;
+      if (loading) {
+        btn.dataset.origHtml = btn.innerHTML;
+        btn.innerHTML = `<span class="loader-spinner" style="width:16px;height:16px;border-width:2px;"></span>`;
+      } else {
+        if (btn.dataset.origHtml) btn.innerHTML = btn.dataset.origHtml;
+        delete btn.dataset.origHtml;
+      }
+    }
+
+    function escHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function timeAgo(date) {
+      const secs = Math.floor((Date.now() - date.getTime()) / 1000);
+      if (secs <  60)  return 'just now';
+      if (secs < 3600) return `${Math.floor(secs/60)}m ago`;
+      if (secs < 86400)return `${Math.floor(secs/3600)}h ago`;
+      return `${Math.floor(secs/86400)}d ago`;
+    }
+
+    function friendlyError(code) {
+      const map = {
+        'auth/email-already-in-use':    'That email is already registered.',
+        'auth/invalid-email':           'Please enter a valid email.',
+        'auth/weak-password':           'Password must be at least 6 characters.',
+        'auth/wrong-password':          'Incorrect password. Try again.',
+        'auth/user-not-found':          'No account found with that email.',
+        'auth/too-many-requests':       'Too many attempts. Please wait a moment.',
+        'auth/popup-closed-by-user':    'Google sign-in was cancelled.',
+        'auth/network-request-failed':  'Network error. Check your connection.',
+        'auth/invalid-credential':      'Invalid credentials. Please try again.',
+      };
+      return map[code] || 'Something went wrong. Please try again.';
+    }
+  </script>
+
 </body>
 </html>
