@@ -884,6 +884,8 @@
       createUserWithEmailAndPassword,
       signInWithEmailAndPassword,
       signInWithPopup,
+      signInWithRedirect,
+      getRedirectResult,
       GoogleAuthProvider,
       onAuthStateChanged,
       signOut,
@@ -923,10 +925,11 @@
     const gProvider = new GoogleAuthProvider();
 
     /* ── State ────────────────────────────────────────────── */
-    let currentUser     = null;
-    let selectedFile    = null;
-    let unsubscribeFeed = null;
-    let postsRendered   = false;
+    let currentUser        = null;
+    let selectedFile       = null;
+    let unsubscribeFeed    = null;
+    let postsRendered      = false;
+    let suppressAuthChange = false; // prevents double-trigger on email-verify signOut
 
     /* ── DOM Refs ─────────────────────────────────────────── */
     const $  = id => document.getElementById(id);
@@ -964,19 +967,40 @@
       toast('Connection is slow — check your internet.', 'error');
     }, 10000);
 
+    /* ── Handle Google redirect result (after signInWithRedirect) ── */
+    getRedirectResult(auth).then(result => {
+      if (result?.user) {
+        // onAuthStateChanged will handle the rest
+        toast('Signed in with Google ✦', 'success');
+      }
+    }).catch(e => {
+      console.error('Redirect result error:', e);
+      if (e.code !== 'auth/no-current-user') {
+        toast(friendlyError(e.code), 'error');
+      }
+    });
+
     /* ── Auth State ───────────────────────────────────────── */
     onAuthStateChanged(auth, user => {
+      if (suppressAuthChange) return;
       clearTimeout(loaderTimeout);
       hideLoader();
       if (user) {
         if (!user.emailVerified && user.providerData[0]?.providerId === 'password') {
+          suppressAuthChange = true;
+          signOut(auth).finally(() => { suppressAuthChange = false; });
           showAuth();
           verifyBanner.classList.remove('hidden');
           toast('Please verify your email first.', 'error');
-          signOut(auth);
           return;
         }
+        const switchedAccount = currentUser && currentUser.uid !== user.uid;
         currentUser = user;
+        if (switchedAccount) {
+          // Different account logged in — reset feed
+          postsRendered = false;
+          if (unsubscribeFeed) { unsubscribeFeed(); unsubscribeFeed = null; }
+        }
         showApp(user);
       } else {
         currentUser = null;
@@ -994,7 +1018,6 @@
     function showAuth() {
       authSection.classList.remove('hidden');
       appSection.classList.add('hidden');
-      // Clear feed so stale cards don't show on re-login
       feed.innerHTML = '';
       postsRendered = false;
     }
@@ -1033,11 +1056,16 @@
       loginPanel.classList.remove('hidden');
     });
 
-    // Enter key submits the visible auth form (only when auth section is shown)
+    // Enter key submits the visible auth form — skip if typing in a textarea
     document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') {
+        if (!lightbox.classList.contains('hidden')) closeLightbox();
+        return;
+      }
       if (e.key !== 'Enter') return;
-      if (authSection.classList.contains('hidden')) return; // not on auth screen
-      if (!loginPanel.classList.contains('hidden'))  $('btn-login').click();
+      if (e.target.tagName === 'TEXTAREA') return; // don't submit while typing caption
+      if (authSection.classList.contains('hidden')) return;
+      if (!loginPanel.classList.contains('hidden'))       $('btn-login').click();
       else if (!signupPanel.classList.contains('hidden')) $('btn-signup').click();
     });
 
@@ -1087,7 +1115,18 @@
         await signInWithPopup(auth, gProvider);
         toast('Signed in with Google ✦', 'success');
       } catch (e) {
-        toast(friendlyError(e.code), 'error');
+        // Popup was blocked or not allowed — fall back to redirect
+        if (e.code === 'auth/popup-blocked' || e.code === 'auth/popup-cancelled' || e.code === 'auth/cancelled-popup-request') {
+          try {
+            await signInWithRedirect(auth, gProvider);
+            // Page will redirect — no need to do anything else
+            return;
+          } catch (redirectErr) {
+            toast(friendlyError(redirectErr.code), 'error');
+          }
+        } else {
+          toast(friendlyError(e.code), 'error');
+        }
       } finally {
         setLoading(btnId, false);
       }
@@ -1355,7 +1394,6 @@
     }
     $('lightbox-close').addEventListener('click', closeLightbox);
     lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLightbox(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
 
     /* ── Helpers ──────────────────────────────────────────── */
     function setLoading(btnId, loading) {
@@ -1390,17 +1428,22 @@
 
     function friendlyError(code) {
       const map = {
-        'auth/email-already-in-use':    'That email is already registered.',
-        'auth/invalid-email':           'Please enter a valid email.',
-        'auth/weak-password':           'Password must be at least 6 characters.',
-        'auth/wrong-password':          'Incorrect password. Try again.',
-        'auth/user-not-found':          'No account found with that email.',
-        'auth/too-many-requests':       'Too many attempts. Please wait a moment.',
-        'auth/popup-closed-by-user':    'Google sign-in was cancelled.',
-        'auth/network-request-failed':  'Network error. Check your connection.',
-        'auth/invalid-credential':      'Invalid credentials. Please try again.',
+        'auth/email-already-in-use':      'That email is already registered.',
+        'auth/invalid-email':             'Please enter a valid email.',
+        'auth/weak-password':             'Password must be at least 6 characters.',
+        'auth/wrong-password':            'Incorrect password. Try again.',
+        'auth/user-not-found':            'No account found with that email.',
+        'auth/too-many-requests':         'Too many attempts. Please wait a moment.',
+        'auth/popup-closed-by-user':      'Google sign-in was cancelled.',
+        'auth/popup-blocked':             'Popup was blocked — trying redirect instead…',
+        'auth/cancelled-popup-request':   'Sign-in cancelled.',
+        'auth/unauthorized-domain':       'This domain isn\'t authorized in Firebase. Add it in the Firebase console → Auth → Settings → Authorized domains.',
+        'auth/network-request-failed':    'Network error. Check your connection.',
+        'auth/invalid-credential':        'Invalid credentials. Please try again.',
+        'auth/user-disabled':             'This account has been disabled.',
+        'auth/operation-not-allowed':     'Google sign-in is not enabled. Enable it in Firebase console → Auth → Sign-in method.',
       };
-      return map[code] || 'Something went wrong. Please try again.';
+      return map[code] || `Something went wrong (${code || 'unknown'}).`;
     }
   </script>
 
