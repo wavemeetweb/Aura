@@ -741,8 +741,10 @@
         <p class="auth-subtitle">Sign in to your account to continue</p>
 
         <div id="verify-banner" class="verify-banner hidden">
-          <strong>Check your inbox!</strong> We sent a verification link to your email.
-          Verify it and then sign in.
+          <div><strong>Verify your email</strong> — check your inbox for the verification link, then sign in.</div>
+          <button class="btn btn-glass" id="btn-resend" style="margin-top:10px;width:100%;font-size:13px;padding:9px;">
+            Resend verification email
+          </button>
         </div>
 
         <div class="form-group">
@@ -905,13 +907,13 @@
 
     /* ── Config ───────────────────────────────────────────── */
     const FIREBASE_CONFIG = {
-      apiKey:            "AIzaSyBBXlMsVKCVZg7wkw2CjWeetnGkpINV_M4",
-      authDomain:        "webnexus-cdc47.firebaseapp.com",
-      projectId:         "webnexus-cdc47",
-      storageBucket:     "webnexus-cdc47.firebasestorage.app",
-      messagingSenderId: "185823698270",
-      appId:             "1:185823698270:web:b92eb6507a6974e46043cf",
-      measurementId:     "G-59DS94R3BX"
+      apiKey:            "AIzaSyATSioQeAc2A9BoGzv8S8o53f6-iDcWVr4",
+      authDomain:        "aurapers0n.firebaseapp.com",
+      projectId:         "aurapers0n",
+      storageBucket:     "aurapers0n.firebasestorage.app",
+      messagingSenderId: "180300314364",
+      appId:             "1:180300314364:web:1cf8bf819d17ac2f324979",
+      measurementId:     "G-Z52FR7FKE7"
     };
 
     const CLOUDINARY_CLOUD  = "dx7tyxquo";
@@ -1056,6 +1058,28 @@
       loginPanel.classList.remove('hidden');
     });
 
+    /* ── Resend verification email ────────────────────────── */
+    $('btn-resend').addEventListener('click', async () => {
+      const email = verifyBanner.dataset.email;
+      const pass  = verifyBanner.dataset.pass;
+      if (!email || !pass) {
+        toast('Please sign in first so we can resend the email.', 'error');
+        return;
+      }
+      setLoading('btn-resend', true);
+      try {
+        const cred = await signInWithEmailAndPassword(auth, email, pass);
+        await sendEmailVerification(cred.user);
+        suppressAuthChange = true;
+        await signOut(auth).finally(() => { suppressAuthChange = false; });
+        toast('Verification email sent! Check your inbox.', 'success');
+      } catch (e) {
+        toast(friendlyError(e.code), 'error');
+      } finally {
+        setLoading('btn-resend', false);
+      }
+    });
+
     // Enter key submits the visible auth form — skip if typing in a textarea
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') {
@@ -1080,13 +1104,46 @@
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await updateProfile(cred.user, { displayName: name });
         await sendEmailVerification(cred.user);
-        await signOut(auth);
+        suppressAuthChange = true;
+        await signOut(auth).finally(() => { suppressAuthChange = false; });
         signupPanel.classList.add('hidden');
         loginPanel.classList.remove('hidden');
+        verifyBanner.dataset.email = email;
+        verifyBanner.dataset.pass  = password;
         verifyBanner.classList.remove('hidden');
-        toast('Account created! Please verify your email.', 'success');
+        toast('Account created! Check your email to verify.', 'success');
       } catch (e) {
-        toast(friendlyError(e.code), 'error');
+        if (e.code === 'auth/email-already-in-use') {
+          // Account exists — check if it's just unverified
+          try {
+            const cred2 = await signInWithEmailAndPassword(auth, email, password);
+            if (!cred2.user.emailVerified) {
+              await sendEmailVerification(cred2.user);
+              suppressAuthChange = true;
+              await signOut(auth).finally(() => { suppressAuthChange = false; });
+              signupPanel.classList.add('hidden');
+              loginPanel.classList.remove('hidden');
+              verifyBanner.dataset.email = email;
+              verifyBanner.dataset.pass  = password;
+              verifyBanner.classList.remove('hidden');
+              toast('Verification email resent! Check your inbox.', 'success');
+            } else {
+              // Already verified — just tell them to log in
+              suppressAuthChange = true;
+              await signOut(auth).finally(() => { suppressAuthChange = false; });
+              signupPanel.classList.add('hidden');
+              loginPanel.classList.remove('hidden');
+              toast('Account already exists. Please sign in.', 'info');
+            }
+          } catch (innerErr) {
+            // Wrong password for existing account
+            toast('An account with this email already exists. Try signing in instead.', 'error');
+            signupPanel.classList.add('hidden');
+            loginPanel.classList.remove('hidden');
+          }
+        } else {
+          toast(friendlyError(e.code), 'error');
+        }
       } finally {
         setLoading('btn-signup', false);
       }
@@ -1099,8 +1156,19 @@
       if (!email || !password) { toast('Please enter email and password.', 'error'); return; }
       setLoading('btn-login', true);
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        toast('Welcome back! 👋', 'success');
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        if (!cred.user.emailVerified) {
+          // Account exists but not verified — sign back out and show resend option
+          suppressAuthChange = true;
+          await signOut(auth).finally(() => { suppressAuthChange = false; });
+          verifyBanner.classList.remove('hidden');
+          // Store credentials so resend button can re-authenticate to send the email
+          verifyBanner.dataset.email = email;
+          verifyBanner.dataset.pass  = password;
+          toast('Please verify your email first. Check your inbox or resend below.', 'error');
+        } else {
+          toast('Welcome back! 👋', 'success');
+        }
       } catch (e) {
         toast(friendlyError(e.code), 'error');
       } finally {
